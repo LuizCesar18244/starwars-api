@@ -125,13 +125,12 @@ public class PlanetService
 		try {
 			planestFind = objectMapper.readValue( response, Planets.class );
 
-			planestFind.getResults( ).forEach(planet -> 
-			{
-				if ( planet.getName( ).trim( ).equalsIgnoreCase( planetSaved.getName( ) ) ) 
-				{
-					planetSaved.setAmountMovieAppearances( planet.getFilms( ).size( ) );
-				}
-			});
+			Optional<Planet> findFirstPlanet = planestFind.getResults( ).stream( )
+			.filter(planet -> planet.getName( ).trim( ).equalsIgnoreCase( planetSaved.getName( ) ) )
+			.findFirst( );
+			
+			if( findFirstPlanet.isPresent( ) )
+				planetSaved.setAmountMovieAppearances( findFirstPlanet.get().getFilms( ).size( ) );
 
 		} catch ( IOException e ) 
 		{
