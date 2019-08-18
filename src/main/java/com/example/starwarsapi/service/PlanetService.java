@@ -22,74 +22,134 @@ import org.springframework.web.client.RestTemplate;
 import com.example.starwarsapi.model.DatabaseSequence;
 import com.example.starwarsapi.model.Planet;
 import com.example.starwarsapi.model.Planets;
+import com.example.starwarsapi.model.Response;
 import com.example.starwarsapi.repository.PlanetRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class PlanetService {
-
+public class PlanetService
+{
 	@Autowired
 	private PlanetRepository planetRepository;
+	
 	@Autowired
 	private MongoOperations mongoOperations;
-
-	public void savePlanet(Planet planet) {
-
-		planet.setId(generateSequence(planet.getSequenceName()));
-		setAmountMovies(planet);
-	}
-
-	public List<Planet> getAllPlanets() {
-
-		return this.planetRepository.findAll();
-	}
-
-	public Optional<Planet> getById(Integer id) {
-		return this.planetRepository.findById(id);
-	}
-
-	public List<Planet> getByName(String name) {
-		return this.planetRepository.findByName(name);
-	}
-
-	public void deletePlanet(Integer id) {
-		Optional<Planet> planet = this.planetRepository.findById(id);
-
-		if (planet.isPresent())
-			this.planetRepository.deleteById(id);
-
-	}
-
-	private void setAmountMovies(Planet planetSaved) {
-
-		String response = getPlanetsFromApi();
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		Planets planestFind = new Planets();
+	
+	private final static String planetSequence = "planets_sequence";
+	
+	/**
+	 * Salva um novo Planeta.
+	 * @param planet
+	 * @return Resposta da requisição.
+	 */
+	public Response savePlanet( Planet planet )
+	{
 		try {
-			planestFind = objectMapper.readValue(response, Planets.class);
+			planet.setName( planet.getName( ).trim( ) );
+			planet.setId( generateSequence( planetSequence ) );
+			setAmountMovies( planet );
 
-			planestFind.getResults().forEach(planet -> {
-				if (planet.getName().equalsIgnoreCase(planetSaved.getName())) {
-					planetSaved.setAmountMovies(planet.getFilms().size());
-				}
-			});
+			return new Response( 1, "Planeta salvo com sucesso!" );
 
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch ( Exception e ) 
+		{
+			return new Response( 0, e.getMessage( ) );
 		}
-		this.planetRepository.save(planetSaved);
-
 	}
 	
 	/**
+	 * Busca todos os Planetas.
+	 * 
+	 * @return Uma Lista com todos os Planetas.
+	 */
+	public List<Planet> getAllPlanets( ) 
+	{
+		return this.planetRepository.findAll( );
+	}
+
+	/**
+	 * Busca um Planeta pelo Id.  
+	 * 
+	 * @return O Planeta relacionado ao Id infomado.
+	 */
+	public Optional<Planet> getById( Integer id )
+	{
+		return this.planetRepository.findById( id );
+	}
+
+	/**
+	 * Busca um Planeta pelo Nome.  
+	 * 
+	 * @return Os Planetas relacionados ao Nome informado.
+	 */
+	public List<Planet> getByName( String name )
+	{
+		return this.planetRepository.findByName( name );
+	}
+	
+	/**
+	 * Deleta um Planeta.
+	 * @param id o Id do Planeta a ser deletado.
+	 * @return Resposta da requisição.
+	 */
+	public Response deletePlanet( Integer id )
+	{
+		try {
+			Optional<Planet> planet = this.planetRepository.findById( id );
+			
+			if ( planet.isPresent( ) ) 
+			{
+				this.planetRepository.deleteById( id );
+				return new Response( 1, "Planeta deletado com sucesso!" );
+			}
+			
+			return new Response( 1, "Planeta não localizado!" );
+			
+		} catch ( Exception e ) 
+		{
+			return new Response( 0, e.getMessage( ) );
+		}
+	}
+	
+	/**
+	 * Adiciona a quantidade de aparições em filmes ao Planeta a ser salvo.
+	 * @param planetSaved Planeta que será salvo.
+	 * @return Resposta da requisição.
+	 */
+	private void setAmountMovies( Planet planetSaved ) 
+	{
+		String response = getPlanetsFromExternalApi( );
+
+		ObjectMapper objectMapper = new ObjectMapper( );
+		Planets planestFind = new Planets( );
+		try {
+			planestFind = objectMapper.readValue( response, Planets.class );
+
+			planestFind.getResults( ).forEach(planet -> 
+			{
+				if ( planet.getName( ).trim( ).equalsIgnoreCase( planetSaved.getName( ) ) ) 
+				{
+					planetSaved.setAmountMovieAppearances( planet.getFilms( ).size( ) );
+				}
+			});
+
+		} catch ( IOException e ) 
+		{
+			e.printStackTrace( );
+		}
+		this.planetRepository.save( planetSaved );
+	}
+
+	/**
 	 * Metódo que busca os dados dos Planetas da API externa.<br>
-	 * <b>OBS:</b> Foi necessário a criação do Header com o user-agent para contornar o erro de permissão (403 Forbidden).
+	 * <b>OBS:</b> Foi necessário a criação do Header com o user-agent para
+	 * contornar o erro de permissão (403 Forbidden).
+	 * 
 	 * @return retona a resposta da requisição no formato de String.
 	 */
-
-	private String getPlanetsFromApi() {
-
+	private String getPlanetsFromExternalApi( ) 
+	{
+		//Uri da API externa
 		final String uri = "https://swapi.co/api/planets/";
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -103,11 +163,13 @@ public class PlanetService {
 	}
 
 	/**
-	 * Metódo que gera a sequencia dos Id's dos Planetas.
+	 * Gera a sequencia dos Id's dos Planetas.
+	 * 
 	 * @param sequenceName nome da sequencia a ser usada.
 	 * @return o número de Id a ser utilizado no Planeta cadastrado.
-	 * */
-	private long generateSequence(String sequenceName) {
+	 */
+	private long generateSequence(String sequenceName)
+	{
 
 		Query query = new Query(Criteria.where("_id").is(sequenceName));
 		DatabaseSequence counter = mongoOperations.findAndModify(query, new Update().inc("seq", 1),

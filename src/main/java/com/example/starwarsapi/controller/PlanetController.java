@@ -9,51 +9,48 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.starwarsapi.model.Planet;
+import com.example.starwarsapi.model.Response;
 import com.example.starwarsapi.service.PlanetService;
 
 @RestController
 @RequestMapping("/api")
-public class PlanetController {
-	
+public class PlanetController
+{
 	@Autowired
 	private PlanetService planetService;
 	
-	/**
-	 * SALVAR UM NOVO PLANETA
-	 * @param planet
-	 * @return
-	 */
 	@RequestMapping( value="/planet", method = RequestMethod.POST )
-	public void save( @RequestBody Planet planet )
+	public  @ResponseBody Response save( @RequestBody Planet planet )
 	{
-		 this.planetService.savePlanet(planet);			
+		 return this.planetService.savePlanet(planet);			
 	}
 	
 	@RequestMapping( value="/planet/{id}", method = RequestMethod.GET )
-	public Optional<Planet> getPlanetById( @PathVariable("id") Integer id )
+	public Optional<Planet> getPlanetById( @PathVariable( "id" ) Integer id )
 	{
-		return this.planetService.getById(id);			
+		return this.planetService.getById( id );			
 	}
 	
 	@RequestMapping( value="/planet", method = RequestMethod.GET )
 	public List<Planet> getPlanetByName( @RequestParam("name") String name )
 	{
-		return this.planetService.getByName(name.trim());			
+		return this.planetService.getByName( name.trim( ) );			
 	}
 	
 	@RequestMapping( value="/planets", method = RequestMethod.GET )
-	public List<Planet> getAllplanets(  )
+	public List<Planet> getAllplanets( )
 	{
-		return this.planetService.getAllPlanets();			
+		return this.planetService.getAllPlanets( );			
 	}
 	
 	@RequestMapping( value="/planet/{id}", method = RequestMethod.DELETE )
-	public void getDeletePlanet(@PathVariable("id") Integer id  )
+	public Response deletePlanet( @PathVariable("id") Integer id )
 	{
-		 this.planetService.deletePlanet(id);			
+		 return this.planetService.deletePlanet( id );			
 	}
 
 }
