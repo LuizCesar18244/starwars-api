@@ -38,7 +38,7 @@ public class PlanetService
 	private final static String planetSequence = "planets_sequence";
 	
 	/**
-	 * Salva um novo Planeta.
+	 * Adiciona um novo Planeta.
 	 * @param planet
 	 * @return Resposta da requisição.
 	 */
@@ -49,7 +49,7 @@ public class PlanetService
 			planet.setId( generateSequence( planetSequence ) );
 			setAmountMovies( planet );
 
-			return new Response( 1, "Planeta salvo com sucesso!" );
+			return new Response( 1, "Planeta adicionado com sucesso!" );
 
 		} catch ( Exception e ) 
 		{
@@ -112,8 +112,8 @@ public class PlanetService
 	}
 	
 	/**
-	 * Adiciona a quantidade de aparições em filmes ao Planeta a ser salvo.
-	 * @param planetSaved Planeta que será salvo.
+	 * Adiciona a quantidade de aparições em filmes ao Planeta a ser adicionado.
+	 * @param planetSaved Planeta que será adicionado.
 	 * @return Resposta da requisição.
 	 */
 	private void setAmountMovies( Planet planetSaved ) 
@@ -126,7 +126,7 @@ public class PlanetService
 			planestFind = objectMapper.readValue( response, Planets.class );
 
 			Optional<Planet> findFirstPlanet = planestFind.getResults( ).stream( )
-			.filter(planet -> planet.getName( ).trim( ).equalsIgnoreCase( planetSaved.getName( ) ) )
+			.filter( planet -> planet.getName( ).trim( ).equalsIgnoreCase( planetSaved.getName( ) ) )
 			.findFirst( );
 			
 			if( findFirstPlanet.isPresent( ) )
@@ -165,11 +165,10 @@ public class PlanetService
 	 * Gera a sequencia dos Id's dos Planetas.
 	 * 
 	 * @param sequenceName nome da sequencia a ser usada.
-	 * @return o número de Id a ser utilizado no Planeta cadastrado.
+	 * @return o número de Id a ser utilizado no Planeta adicionado.
 	 */
 	private long generateSequence(String sequenceName)
 	{
-
 		Query query = new Query(Criteria.where("_id").is(sequenceName));
 		DatabaseSequence counter = mongoOperations.findAndModify(query, new Update().inc("seq", 1),
 				new FindAndModifyOptions().returnNew(true).upsert(true), DatabaseSequence.class);
