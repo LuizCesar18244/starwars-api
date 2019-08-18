@@ -3,6 +3,7 @@ package com.example.starwarsapi.model;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,12 +14,14 @@ public class Planet {
 
 	@Id
 	private Long id;
+	@Transient
+    private String SEQUENCE_PLANETS = "planets_sequence";
 	private String name;
 	private String climate;
 	private String terrain;
 	private List<String> films;
 	private int amountMovies;
-
+	
 	public Planet() {}
 
 	public Planet(String name, String climate, String terrain) {
@@ -57,5 +60,9 @@ public class Planet {
 
 	public void setAmountMovies(int amountMovies) {
 		this.amountMovies = amountMovies;
+	}
+
+	public String getSequenceName() {
+		return SEQUENCE_PLANETS;
 	}
 }
