@@ -13,12 +13,14 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 public class Planet {
 
 	@Id
+	@JsonProperty(access = Access.WRITE_ONLY)
 	private Long id;
 	private String name;
 	private String climate;
 	private String terrain;
 	@JsonProperty(access = Access.WRITE_ONLY)
 	private List<String> films;
+	@JsonProperty(access = Access.WRITE_ONLY)
 	private int amountMovieAppearances;
 	
 	public Planet() {}
