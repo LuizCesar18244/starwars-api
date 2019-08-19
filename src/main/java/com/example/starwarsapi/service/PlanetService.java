@@ -114,7 +114,7 @@ public class PlanetService
 	/**
 	 * Adiciona a quantidade de aparições em filmes ao Planeta a ser adicionado.
 	 * @param planetSaved Planeta que será adicionado.
-	 * @return Resposta da requisição.
+	 * 
 	 */
 	private void setAmountMovies( Planet planetSaved ) 
 	{
